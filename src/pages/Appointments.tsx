@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, Clock, User, Video, Phone, MoreHorizontal } from 'lucide-react';
+import { Button, Table, Space, Typography, Tag, Select, Card, Radio, Avatar } from 'antd';
+import {
+  PlusOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+  PhoneOutlined,
+  EditOutlined,
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
 import { useData } from '../contexts/DataContext';
 import { Appointment, AppointmentStatus } from '../types';
 import { format } from 'date-fns';
 import { AppointmentModal } from '../components/AppointmentModal';
 import { AppointmentCalendar } from '../components/AppointmentCalendar';
 import toast from 'react-hot-toast';
+
+const { Title } = Typography;
+const { Option } = Select;
 
 export function Appointments() {
   const { appointments, updateAppointment } = useData();
@@ -28,149 +41,166 @@ export function Appointments() {
     toast.success('Appointment status updated');
   };
 
-  const getStatusColor = (status: AppointmentStatus) => {
+  const getStatusConfig = (status: AppointmentStatus) => {
     switch (status) {
-      case AppointmentStatus.SCHEDULED: return 'bg-yellow-100 text-yellow-800';
-      case AppointmentStatus.CONFIRMED: return 'bg-green-100 text-green-800';
-      case AppointmentStatus.COMPLETED: return 'bg-blue-100 text-blue-800';
-      case AppointmentStatus.CANCELLED: return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case AppointmentStatus.SCHEDULED:
+        return { color: 'gold', label: 'Scheduled' };
+      case AppointmentStatus.CONFIRMED:
+        return { color: 'green', label: 'Confirmed' };
+      case AppointmentStatus.COMPLETED:
+        return { color: 'blue', label: 'Completed' };
+      case AppointmentStatus.CANCELLED:
+        return { color: 'red', label: 'Cancelled' };
+      default:
+        return { color: 'default', label: 'Unknown' };
     }
   };
 
-  const sortedAppointments = [...appointments].sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+  const sortedAppointments = [...appointments].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Appointments</h1>
-        <div className="flex items-center space-x-4">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'list' 
-                  ? 'bg-white text-gray-900 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              List
-            </button>
-            <button
-              onClick={() => setViewMode('calendar')}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'calendar' 
-                  ? 'bg-white text-gray-900 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Calendar
-            </button>
+  const columns: ColumnsType<Appointment> = [
+    {
+      title: 'Patient',
+      key: 'patient',
+      render: (_, record) => (
+        <Space>
+          <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
+          <div>
+            <div style={{ fontWeight: 500 }}>{record.patientName}</div>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Book Appointment</span>
-          </button>
+        </Space>
+      ),
+    },
+    {
+      title: 'Doctor',
+      dataIndex: 'doctorName',
+      key: 'doctorName',
+    },
+    {
+      title: 'Date & Time',
+      key: 'date',
+      render: (_, record) => (
+        <div>
+          <div style={{ marginBottom: '4px' }}>
+            <CalendarOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+            {format(new Date(record.date), 'MMM d, yyyy')}
+          </div>
+          <div>
+            <ClockCircleOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+            {format(new Date(record.date), 'h:mm a')} ({record.duration}min)
+          </div>
         </div>
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type: string) => (
+        <div>
+          {type === 'Telemedicine' ? (
+            <>
+              <VideoCameraOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+              {type}
+            </>
+          ) : (
+            <>
+              <PhoneOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+              {type}
+            </>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: AppointmentStatus, record) => {
+        const config = getStatusConfig(status);
+        return (
+          <Select
+            value={status}
+            onChange={(value) => handleStatusChange(record.id, value)}
+            style={{ width: 120 }}
+            size="small"
+          >
+            <Option value={AppointmentStatus.SCHEDULED}>
+              <Tag color="gold">Scheduled</Tag>
+            </Option>
+            <Option value={AppointmentStatus.CONFIRMED}>
+              <Tag color="green">Confirmed</Tag>
+            </Option>
+            <Option value={AppointmentStatus.COMPLETED}>
+              <Tag color="blue">Completed</Tag>
+            </Option>
+            <Option value={AppointmentStatus.CANCELLED}>
+              <Tag color="red">Cancelled</Tag>
+            </Option>
+          </Select>
+        );
+      },
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <Button
+          type="primary"
+          icon={<EditOutlined />}
+          onClick={() => handleEditAppointment(record)}
+          size="small"
+        >
+          Edit
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={2} style={{ margin: 0 }}>
+          Appointments
+        </Title>
+        <Space>
+          <Radio.Group
+            value={viewMode}
+            onChange={(e) => setViewMode(e.target.value)}
+            buttonStyle="solid"
+          >
+            <Radio.Button value="list">List</Radio.Button>
+            <Radio.Button value="calendar">Calendar</Radio.Button>
+          </Radio.Group>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsModalOpen(true)}
+            size="large"
+          >
+            Book Appointment
+          </Button>
+        </Space>
       </div>
 
       {viewMode === 'calendar' ? (
         <AppointmentCalendar appointments={appointments} onEditAppointment={handleEditAppointment} />
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patient
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Doctor
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date & Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {sortedAppointments.map((appointment) => (
-                  <tr key={appointment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {appointment.patientName}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{appointment.doctorName}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-900">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        {format(new Date(appointment.date), 'MMM d, yyyy')}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {format(new Date(appointment.date), 'h:mm a')} ({appointment.duration}min)
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-900">
-                        {appointment.type === 'Telemedicine' ? (
-                          <Video className="h-4 w-4 mr-1" />
-                        ) : (
-                          <Phone className="h-4 w-4 mr-1" />
-                        )}
-                        {appointment.type}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={appointment.status}
-                        onChange={(e) => handleStatusChange(appointment.id, e.target.value as AppointmentStatus)}
-                        className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(appointment.status)}`}
-                      >
-                        <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
-                        <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
-                        <option value={AppointmentStatus.COMPLETED}>Completed</option>
-                        <option value={AppointmentStatus.CANCELLED}>Cancelled</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEditAppointment(appointment)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Card className="medops-card">
+          <Table
+            columns={columns}
+            dataSource={sortedAppointments}
+            rowKey="id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Total ${total} appointments`,
+            }}
+            style={{ borderRadius: '8px' }}
+          />
+        </Card>
       )}
 
       <AppointmentModal

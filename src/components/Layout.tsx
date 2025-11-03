@@ -1,6 +1,9 @@
 import React from 'react';
+import { Layout as AntLayout } from 'antd';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+
+const { Content } = AntLayout;
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,14 +11,21 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <AntLayout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <AntLayout style={{ marginLeft: 256 }}>
         <Header />
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
-      </div>
-    </div>
+        <Content
+          style={{
+            margin: '24px 16px',
+            padding: 24,
+            minHeight: 280,
+            background: '#f0f2f5',
+          }}
+        >
+          <div className="fade-in">{children}</div>
+        </Content>
+      </AntLayout>
+    </AntLayout>
   );
 }

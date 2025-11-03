@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, User, Mail, Phone, Calendar } from 'lucide-react';
+import { Button, Input, Table, Space, Typography, Popconfirm, Tag, Avatar, Card } from 'antd';
+import {
+  PlusOutlined,
+  SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  CalendarOutlined,
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
 import { useData } from '../contexts/DataContext';
 import { Patient } from '../types';
 import { format } from 'date-fns';
 import { PatientModal } from '../components/PatientModal';
 import toast from 'react-hot-toast';
+
+const { Title } = Typography;
 
 export function Patients() {
   const { patients, deletePatient } = useData();
@@ -12,9 +25,10 @@ export function Patients() {
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPatients = patients.filter(
+    (patient) =>
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleEditPatient = (patient: Patient) => {
@@ -23,10 +37,8 @@ export function Patients() {
   };
 
   const handleDeletePatient = (patient: Patient) => {
-    if (window.confirm(`Are you sure you want to delete ${patient.name}?`)) {
-      deletePatient(patient.id);
-      toast.success('Patient deleted successfully');
-    }
+    deletePatient(patient.id);
+    toast.success('Patient deleted successfully');
   };
 
   const handleCloseModal = () => {
@@ -34,117 +46,129 @@ export function Patients() {
     setEditingPatient(null);
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Patient</span>
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search patients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+  const columns: ColumnsType<Patient> = [
+    {
+      title: 'Patient',
+      key: 'name',
+      render: (_, record) => (
+        <Space>
+          <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
+          <div>
+            <div style={{ fontWeight: 500 }}>{record.name}</div>
+            <div style={{ fontSize: '12px', color: '#8c8c8c' }}>ID: {record.id}</div>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: 'Contact',
+      key: 'contact',
+      render: (_, record) => (
+        <div>
+          <div style={{ marginBottom: '4px' }}>
+            <MailOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+            {record.email}
+          </div>
+          <div>
+            <PhoneOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+            {record.phone}
           </div>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Patient
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date of Birth
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Blood Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPatients.map((patient) => (
-                <tr key={patient.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                        <div className="text-sm text-gray-500">ID: {patient.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 flex items-center">
-                      <Mail className="h-4 w-4 mr-1" />
-                      {patient.email}
-                    </div>
-                    <div className="text-sm text-gray-500 flex items-center">
-                      <Phone className="h-4 w-4 mr-1" />
-                      {patient.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {format(new Date(patient.dateOfBirth), 'MMM d, yyyy')}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
-                      {patient.bloodType}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditPatient(patient)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeletePatient(patient)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      ),
+    },
+    {
+      title: 'Date of Birth',
+      dataIndex: 'dateOfBirth',
+      key: 'dateOfBirth',
+      render: (date: string) => (
+        <div>
+          <CalendarOutlined style={{ marginRight: '4px', color: '#8c8c8c' }} />
+          {format(new Date(date), 'MMM d, yyyy')}
         </div>
+      ),
+    },
+    {
+      title: 'Blood Type',
+      dataIndex: 'bloodType',
+      key: 'bloodType',
+      render: (bloodType: string) => (
+        <Tag color="red" style={{ fontWeight: 500 }}>
+          {bloodType}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => handleEditPatient(record)}
+            size="small"
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete Patient"
+            description={`Are you sure you want to delete ${record.name}?`}
+            onConfirm={() => handleDeletePatient(record)}
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{ danger: true }}
+          >
+            <Button type="primary" danger icon={<DeleteOutlined />} size="small">
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={2} style={{ margin: 0 }}>
+          Patients
+        </Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setIsModalOpen(true)}
+          size="large"
+        >
+          Add Patient
+        </Button>
       </div>
 
-      <PatientModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        patient={editingPatient}
-      />
+      <Card className="medops-card">
+        <div style={{ marginBottom: '16px' }}>
+          <Input
+            placeholder="Search patients by name or email..."
+            prefix={<SearchOutlined />}
+            size="large"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ borderRadius: '8px' }}
+          />
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={filteredPatients}
+          rowKey="id"
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total) => `Total ${total} patients`,
+          }}
+          style={{ borderRadius: '8px' }}
+        />
+      </Card>
+
+      <PatientModal isOpen={isModalOpen} onClose={handleCloseModal} patient={editingPatient} />
     </div>
   );
 }
