@@ -78,8 +78,31 @@
   min-height: 100vh;
 }
 
+/* Menu Item Styling */
+.ant-menu-item {
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.ant-menu-item:hover {
+  background-color: #f0f2f5 !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
 .ant-menu-item-selected {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #fff !important;
+}
+
+.ant-menu-item-selected .ant-menu-item-icon {
+  color: #fff !important;
+}
+
+.ant-menu-item-selected::after {
+  display: none !important;
+}
+
+.ant-menu-item-active {
+  color: rgba(0, 0, 0, 0.85) !important;
 }
 
 .ant-btn-primary {

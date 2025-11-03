@@ -52,51 +52,37 @@ export function Header() {
         zIndex: 1000,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h1
-          style={{
-            margin: 0,
-            fontSize: '20px',
-            fontWeight: 600,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          MedOps
-        </h1>
-      </div>
+      <div style={{ marginLeft: 'auto' }}>
+        <Space size="large">
+          <Badge count={3} size="small">
+            <Button
+              type="text"
+              icon={<BellOutlined style={{ fontSize: '18px' }} />}
+              style={{ fontSize: '18px' }}
+            />
+          </Badge>
 
-      <Space size="large">
-        <Badge count={3} size="small">
-          <Button
-            type="text"
-            icon={<BellOutlined style={{ fontSize: '18px' }} />}
-            style={{ fontSize: '18px' }}
-          />
-        </Badge>
-
-        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-          <Space style={{ cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}>
-            <Avatar
-              size={36}
-              icon={<UserOutlined />}
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              }}
-            >
-              {user?.name?.charAt(0).toUpperCase()}
-            </Avatar>
-            <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontWeight: 500, fontSize: '14px' }}>{user?.name}</div>
-              <div style={{ fontSize: '12px', color: '#8c8c8c', textTransform: 'capitalize' }}>
-                {user?.role}
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+            <Space style={{ cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}>
+              <Avatar
+                size={36}
+                icon={<UserOutlined />}
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                }}
+              >
+                {user?.name?.charAt(0).toUpperCase()}
+              </Avatar>
+              <div style={{ lineHeight: 1.2 }}>
+                <div style={{ fontWeight: 500, fontSize: '14px' }}>{user?.name}</div>
+                <div style={{ fontSize: '12px', color: '#8c8c8c', textTransform: 'capitalize' }}>
+                  {user?.role}
+                </div>
               </div>
-            </div>
-          </Space>
-        </Dropdown>
-      </Space>
+            </Space>
+          </Dropdown>
+        </Space>
+      </div>
     </AntHeader>
   );
 }
