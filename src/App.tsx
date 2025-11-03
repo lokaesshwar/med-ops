@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
+import { store } from './store/store';
+import { loadUserFromStorage } from './store/authSlice';
+import { useAppDispatch } from './store/hooks';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { Layout } from './components/Layout';
@@ -18,7 +22,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return user ? <Layout>{children}</Layout> : <Navigate to="/login" />;
 }
 
-function App() {
+function AppContent() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(loadUserFromStorage());
+  }, [dispatch]);
+
   return (
     <AuthProvider>
       <DataProvider>
@@ -58,6 +68,14 @@ function App() {
         </Router>
       </DataProvider>
     </AuthProvider>
+  );
+}
+
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
   );
 }
 
