@@ -18,12 +18,12 @@ The frontend is fully built in React with **modular architecture**, while the ba
 |-----------|-------------|
 | **Frontend Framework** | React (TypeScript + Vite) |
 | **State Management** | Redux Toolkit + React Context API |
-| **Styling** | CSS Modules / TailwindCSS (as applicable) |
+| **Styling** | CSS Modules  |
 | **Routing** | React Router |
 | **Backend (planned / integrated in old repo)** | Supabase (PostgreSQL, Auth, Email APIs) |
-| **Video Conferencing** | WebRTC / PeerJS Integration |
+| **Video Conferencing** | WebRTC Integration |
 | **Authentication** | Role-Based Auth (Admin, Doctor, Nurse, Patient) |
-| **Deployment** | Vercel / Netlify |
+| **Deployment** | Vercel  |
 
 ---
 
